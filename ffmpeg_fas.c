@@ -26,6 +26,7 @@ extern "C"
 {
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
+#include "libswscale/swscale.h"
 int img_convert(AVPicture *dst, int dst_pix_fmt, const AVPicture *src, int src_pix_fmt, int src_width, int src_height);
 }
 #else
@@ -208,8 +209,8 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
 
   fas_context->seek_table = seek_init_table (-1); /* default starting size */ 
 
-  //if (av_open_input_file ( &(fas_context->format_context), file_path, NULL, 0, NULL ) != 0)
-  if (avformat_open_input( &(fas_context->format_context), file_path, NULL, NULL) != 0)
+  if (av_open_input_file ( &(fas_context->format_context), file_path, NULL, 0, NULL ) != 0)
+  //if (avformat_open_input( &(fas_context->format_context), file_path, NULL, NULL) != 0)
     {
       fas_close_video(fas_context);
       return private_show_error ("failure to open file", FAS_UNSUPPORTED_FORMAT);
@@ -804,22 +805,23 @@ static void private_show_warning (const char *message)
 
 fas_error_type private_convert_to_rgb (fas_context_ref_type ctx)
 {
+  static struct SwsContext *img_convert_ctx;
+  int w = ctx->codec_context->width;
+  int h = ctx->codec_context->height;
+  
+  img_convert_ctx = sws_getContext(w, h, ctx->codec_context->pix_fmt,
+                                   w, h, fmt, SWS_BICUBIC,
+                                   NULL, NULL, NULL);
+
+  if(img_convert_ctx == NULL)
+    private_show_error("cannot initialize the conversion context", FAS_DECODING_ERROR);
+
   if (ctx->rgb_already_converted)
     return FAS_SUCCESS;
 
-  if (ctx->rgb_buffer == 0)
-    {
-      int numBytes = avpicture_get_size(fmt, ctx->codec_context->width,
-					ctx->codec_context->height);
-      ctx->rgb_buffer = (uint8_t *) av_malloc(numBytes*sizeof(uint8_t));
-      avpicture_fill((AVPicture *) ctx->rgb_frame_buffer, ctx->rgb_buffer, fmt,
-		     ctx->codec_context->width, ctx->codec_context->height);
-    }
-
-  if (img_convert((AVPicture *) ctx->rgb_frame_buffer, fmt, (AVPicture *) ctx->frame_buffer, 
-		  ctx->codec_context->pix_fmt,
-		  ctx->codec_context->width, ctx->codec_context->height) < 0)
-    private_show_error("error converting to rgb", FAS_DECODING_ERROR);
+  if(sws_scale(img_convert_ctx, ctx->frame_buffer->data, ctx->frame_buffer->linesize,
+               0, h, ctx->rgb_frame_buffer->data, ctx->rgb_frame_buffer->linesize))
+     private_show_error("error converting to rgb", FAS_DECODING_ERROR);
 
   ctx->rgb_already_converted = FAS_TRUE;
 
@@ -844,15 +846,6 @@ fas_error_type private_convert_to_gray8 (fas_context_ref_type ctx)
 
   if (ctx->gray8_already_converted)
     return FAS_SUCCESS;
-
-  if (ctx->gray8_buffer == 0)
-    {
-      int numBytes = avpicture_get_size(PIX_FMT_GRAY8, ctx->codec_context->width,
-					ctx->codec_context->height);
-      ctx->gray8_buffer = (uint8_t *) av_malloc(numBytes*sizeof(uint8_t));
-      avpicture_fill((AVPicture *) ctx->gray8_frame_buffer, ctx->gray8_buffer, PIX_FMT_GRAY8,
-		     ctx->codec_context->width, ctx->codec_context->height);
-    }
 
   if(sws_scale(img_convert_ctx, ctx->frame_buffer->data, ctx->frame_buffer->linesize,
                0, h, ctx->gray8_frame_buffer->data, ctx->gray8_frame_buffer->linesize))
