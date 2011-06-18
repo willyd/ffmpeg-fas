@@ -31,6 +31,8 @@ int img_convert(AVPicture *dst, int dst_pix_fmt, const AVPicture *src, int src_p
 #else
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
+#include "libavutil/log.h"
+#include "libswscale/swscale.h"
 #endif /*  _WIN32 && STATIC_DLL */
 
 #include "seek_indices.h"
@@ -114,7 +116,7 @@ void fas_set_logging (fas_boolean_type logging)
       SHOW_ERROR_MESSAGES = 1;
       SHOW_WARNING_MESSAGES = 1;
 #ifndef _WIN32
-      av_log_level = AV_LOG_INFO;
+	  av_log_set_level(AV_LOG_INFO);
 #endif
     }
   else 
@@ -122,7 +124,7 @@ void fas_set_logging (fas_boolean_type logging)
       SHOW_ERROR_MESSAGES = 0;
       SHOW_WARNING_MESSAGES = 0;
 #ifndef _WIN32
-      av_log_level = AV_LOG_QUIET;
+	  av_log_set_level(AV_LOG_QUIET);
 #endif
     }  
 }
@@ -206,7 +208,8 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
 
   fas_context->seek_table = seek_init_table (-1); /* default starting size */ 
 
-  if (av_open_input_file ( &(fas_context->format_context), file_path, NULL, 0, NULL ) != 0)
+  //if (av_open_input_file ( &(fas_context->format_context), file_path, NULL, 0, NULL ) != 0)
+  if (avformat_open_input( &(fas_context->format_context), file_path, NULL, NULL) != 0)
     {
       fas_close_video(fas_context);
       return private_show_error ("failure to open file", FAS_UNSUPPORTED_FORMAT);
@@ -219,12 +222,12 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
     }
 
   if (SHOW_WARNING_MESSAGES)
-    dump_format(fas_context->format_context, 0, file_path, 0);
+    av_dump_format(fas_context->format_context, 0, file_path, 0);
 
   int stream_idx;
   for (stream_idx = 0; stream_idx < fas_context->format_context->nb_streams; stream_idx++) 
     {
-      if (fas_context->format_context->streams[stream_idx]->codec->codec_type == CODEC_TYPE_VIDEO)
+      if (fas_context->format_context->streams[stream_idx]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
 	{
 	  fas_context->stream_idx = stream_idx;
 	  fas_context->codec_context  = fas_context->format_context->streams[stream_idx]->codec;
@@ -378,7 +381,7 @@ fas_error_type fas_step_forward (fas_context_ref_type context)
 	  /* note this -1 approach to setting the packet is a workaround for a common failure. setting 
 	     to 0 would work just incur a huge penalty in videos that needed -1. Might be worth testing.
 	  */
-	  if (packet.flags & PKT_FLAG_KEY)
+	  if (packet.flags & AV_PKT_FLAG_KEY)
 	    {
 	      //fprintf(stderr, "Packet: (F:%d %lld %lld)\n", context->current_frame_index, packet.pts, packet.dts);
 	      
@@ -388,8 +391,7 @@ fas_error_type fas_step_forward (fas_context_ref_type context)
 		context->keyframe_packet_dts = context->previous_dts;
 	    }
 	  
-	  avcodec_decode_video(context->codec_context, context->frame_buffer, &frameFinished,
-			       packet.data, packet.size);	
+	  avcodec_decode_video2(context->codec_context, context->frame_buffer, &frameFinished, &packet);
 	  
 	  if (frameFinished)
 	    {
@@ -829,6 +831,17 @@ fas_error_type private_convert_to_rgb (fas_context_ref_type ctx)
 
 fas_error_type private_convert_to_gray8 (fas_context_ref_type ctx)
 {
+  static struct SwsContext *img_convert_ctx;
+  int w = ctx->codec_context->width;
+  int h = ctx->codec_context->height;
+  
+  img_convert_ctx = sws_getContext(w, h, ctx->codec_context->pix_fmt,
+                                   w, h, PIX_FMT_GRAY8, SWS_BICUBIC,
+                                   NULL, NULL, NULL);
+
+  if(img_convert_ctx == NULL)
+    private_show_error("cannot initialize the conversion context", FAS_DECODING_ERROR);
+
   if (ctx->gray8_already_converted)
     return FAS_SUCCESS;
 
@@ -841,10 +854,9 @@ fas_error_type private_convert_to_gray8 (fas_context_ref_type ctx)
 		     ctx->codec_context->width, ctx->codec_context->height);
     }
 
-  if (img_convert((AVPicture *) ctx->gray8_frame_buffer, PIX_FMT_GRAY8, (AVPicture *) ctx->frame_buffer, 
-		  ctx->codec_context->pix_fmt,
-		  ctx->codec_context->width, ctx->codec_context->height) < 0)
-    private_show_error("error converting to gray8", FAS_DECODING_ERROR);
+  if(sws_scale(img_convert_ctx, ctx->frame_buffer->data, ctx->frame_buffer->linesize,
+               0, h, ctx->gray8_frame_buffer->data, ctx->gray8_frame_buffer->linesize))
+     private_show_error("error converting to gray8", FAS_DECODING_ERROR);
 
   ctx->gray8_already_converted = FAS_TRUE;
 
