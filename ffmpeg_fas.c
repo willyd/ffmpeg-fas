@@ -224,7 +224,7 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
   int stream_idx;
   for (stream_idx = 0; stream_idx < fas_context->format_context->nb_streams; stream_idx++) 
     {
-      if (fas_context->format_context->streams[stream_idx]->codec->codec_type == CODEC_TYPE_VIDEO)
+      if (fas_context->format_context->streams[stream_idx]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
 	{
 	  fas_context->stream_idx = stream_idx;
 	  fas_context->codec_context  = fas_context->format_context->streams[stream_idx]->codec;
@@ -378,7 +378,7 @@ fas_error_type fas_step_forward (fas_context_ref_type context)
 	  /* note this -1 approach to setting the packet is a workaround for a common failure. setting 
 	     to 0 would work just incur a huge penalty in videos that needed -1. Might be worth testing.
 	  */
-	  if (packet.flags & PKT_FLAG_KEY)
+	  if (packet.flags & AV_PKT_FLAG_KEY)
 	    {
 	      //fprintf(stderr, "Packet: (F:%d %lld %lld)\n", context->current_frame_index, packet.pts, packet.dts);
 	      
@@ -388,8 +388,7 @@ fas_error_type fas_step_forward (fas_context_ref_type context)
 		context->keyframe_packet_dts = context->previous_dts;
 	    }
 	  
-	  avcodec_decode_video(context->codec_context, context->frame_buffer, &frameFinished,
-			       packet.data, packet.size);	
+	  avcodec_decode_video2(context->codec_context, context->frame_buffer, &frameFinished, &packet);
 	  
 	  if (frameFinished)
 	    {
