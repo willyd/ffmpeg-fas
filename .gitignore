@@ -1,3 +1,9 @@
 \#*
 *~
 .svn
+/_UpgradeReport_Files
+/Debug
+/Release
+*.ncb
+*.user
+/UpgradeLog.XML
