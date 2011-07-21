@@ -13,6 +13,9 @@
   <ItemGroup>
     <ClCompile Include="dump_frames.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\test_support.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CF77944D-1429-4940-9EA5-DAFE7C7EB698}</ProjectGuid>
     <RootNamespace>dump_frames</RootNamespace>
@@ -44,7 +47,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\..\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

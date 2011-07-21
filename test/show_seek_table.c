@@ -41,13 +41,13 @@ int main (int argc, char **argv)
     return -1;
 
   while (fas_frame_available (context))
-    {
-      if (FAS_SUCCESS != fas_get_frame (context, &image_buffer))
-	return -1;
-      fas_free_frame (image_buffer);
+  {
+    if (FAS_SUCCESS != fas_get_frame (context, &image_buffer))
+      return -1;
+    fas_free_frame (image_buffer);
 
-      video_error = fas_step_forward (context);
-    }
+    video_error = fas_step_forward (context);
+  }
 
   seek_table_type table;
   table = fas_get_seek_table(context);
@@ -56,4 +56,3 @@ int main (int argc, char **argv)
   
   return 1;
 }
-
