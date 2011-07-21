@@ -26,6 +26,8 @@
 
 int main (int argc, char **argv)
 {
+  int i;
+  seek_table_type table;
   fas_error_type video_error;
   fas_context_ref_type context, seek_context;
   
@@ -34,7 +36,7 @@ int main (int argc, char **argv)
     fail("arguments\n");
   }
 
-  seek_table_type table = read_table_file(argv[2]);
+  table = read_table_file(argv[2]);
   if (table.num_entries == 0)
     fail("bad table\n");
 
@@ -49,20 +51,18 @@ int main (int argc, char **argv)
   video_error = fas_open_video (&seek_context, argv[1]);
   if (video_error != FAS_SUCCESS)    fail("fail on open\n");
   
-  int i;
   for(i=0;i<table.num_entries;i++)
     {
+      char filename[50];
+      fas_raw_image_type image_buffer;
       //      int frame_index = table.array[table.num_entries - i - 1].display_index;
       int frame_index = table.array[i].display_index;
       if (FAS_SUCCESS != fas_seek_to_frame(context, frame_index))
 	fail("failed on seek");
 
-      fas_raw_image_type image_buffer;
-
       if (FAS_SUCCESS != fas_get_frame (context, &image_buffer))
 	fail("failed on rgb image\n");  
 
-      char filename[50];
       sprintf(filename, "frame_%04d.ppm", frame_index);
       
       fprintf(stderr, "Writing %s (seek_table_value=%d frame_index=%d)\n", filename, frame_index, fas_get_frame_index(context));
