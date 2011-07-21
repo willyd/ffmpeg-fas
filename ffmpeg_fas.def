@@ -3,6 +3,7 @@ EXPORTS
 	fas_initialize
 	fas_open_video
 	fas_close_video
+  fas_frame_available
 	fas_free_frame
 	fas_get_frame
 	fas_get_frame_index
@@ -10,5 +11,17 @@ EXPORTS
 	fas_step_forward
 	fas_seek_to_frame
 	fas_get_frame_count
+  fas_put_seek_table
+  fas_get_seek_table
 	fas_get_current_height
 	fas_get_current_width
+
+  seek_init_table
+  seek_release_table
+  seek_copy_table
+  compare_seek_tables
+  seek_append_table_entry
+  seek_get_nearest_entry
+  seek_show_table
+  seek_show_raw_table
+  read_table_file

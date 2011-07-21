@@ -31,7 +31,7 @@
 
 #define    DEFAULT_INITIAL_SIZE    100
 
-static seek_error_type private_show_error (const char *message, seek_error_type error);
+static seek_error_type private_show_error(const char *message, seek_error_type error);
 static seek_error_type private_resize_table (seek_table_type *table, int new_size);
 
 
@@ -157,7 +157,7 @@ seek_error_type seek_append_table_entry (seek_table_type *table, seek_entry_type
     {
       seek_error_type error = private_resize_table (table, table->num_entries * 2);
       if (error != seek_no_error)
-	return private_show_error ("unable to resize seek table", error);
+	return private_show_error("unable to resize seek table", error);
     }
 
   table->array[table->num_entries] = entry;
@@ -166,25 +166,21 @@ seek_error_type seek_append_table_entry (seek_table_type *table, seek_entry_type
   return seek_no_error;
 }
 
-/*
- * seek_get_nearest_entry
+/**
+ * Using offset > 0 returns a modified seek_entry that sets the 'time-to-seek' to be $offset keyframes in the past.
  */
-
 seek_error_type seek_get_nearest_entry (seek_table_type *table, seek_entry_type *entry, int display_index, int offset)
 {
-  /* using offset>0 returns a modified seek_entry that sets the 'time-to-seek' to be $offset keyframes in the past. 
-   */
-
   if (NULL == table || NULL == table->array || table->num_entries <= 0) {
-    return private_show_error ("NULL or invalid seek table", seek_bad_argument);
+    return private_show_error("NULL or invalid seek table", seek_bad_argument);
   }
 
   if (NULL == entry) {
-    return private_show_error ("NULL entry buffer (for return)", seek_bad_argument);
+    return private_show_error("NULL entry buffer (for return)", seek_bad_argument);
   }
 
   if (display_index < table->array[0].display_index)
-    return private_show_error ("tried to seek to frame index before first frame", seek_bad_argument);
+    return private_show_error("tried to seek to frame index before first frame", seek_bad_argument);
 
   int i;
   for (i=0; i < table->num_entries; i++)
@@ -194,7 +190,7 @@ seek_error_type seek_get_nearest_entry (seek_table_type *table, seek_entry_type 
   i = i-1;
 
   if (i<offset)   /* target was lower than first element (including offset) */
-    return private_show_error ("target index out of table range (too small)", seek_bad_argument);
+    return private_show_error("target index out of table range (too small)", seek_bad_argument);
   
   *entry = table->array[i];
   (*entry).first_packet_dts = table->array[i-offset].first_packet_dts;
@@ -237,7 +233,7 @@ seek_error_type seek_show_raw_table (FILE* file, seek_table_type table)
   int index;
 
   if (NULL == table.array || table.num_entries <= 0)
-    return private_show_error ("NULL or invalid seek table", seek_bad_argument);
+    return private_show_error("NULL or invalid seek table", seek_bad_argument);
   
   int completed_flag = 0;
   if (table.completed == seek_true)
@@ -259,7 +255,7 @@ seek_error_type seek_show_table (seek_table_type table)
   int index;
 
   if (NULL == table.array || table.num_entries <= 0) {
-    return private_show_error ("NULL or invalid seek table", seek_bad_argument);
+    return private_show_error("NULL or invalid seek table", seek_bad_argument);
   }
   
   int completed_flag = 0;
@@ -284,7 +280,7 @@ seek_error_type seek_show_table (seek_table_type table)
  * private_show_error
  */
 
-static seek_error_type private_show_error (const char *message, seek_error_type error)
+static seek_error_type private_show_error(const char *message, seek_error_type error)
 {
   if (SHOW_ERROR_MESSAGES)
     fprintf (stderr, " ===> seek_indices: %s\n", message);
@@ -301,12 +297,12 @@ static seek_error_type private_resize_table (seek_table_type *table, int new_siz
   seek_entry_type *new_array = NULL;
 
   if (table == NULL || new_size < 0) {
-    return private_show_error ("invalid argument for private_resize_table()", seek_malloc_failed);
+    return private_show_error("invalid argument for private_resize_table()", seek_malloc_failed);
   }
 
   new_array = (seek_entry_type *)malloc (sizeof (seek_entry_type) * new_size);
   if (NULL == new_array) {
-    return private_show_error ("unable to allocate more space for table", seek_malloc_failed);
+    return private_show_error("unable to allocate more space for table", seek_malloc_failed);
   }
 
   memcpy (new_array, table->array, table->allocated_size * sizeof (seek_entry_type));
