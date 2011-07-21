@@ -18,6 +18,9 @@
  * along with the ffmpeg-fas library.  If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+#if defined _WIN32
+#define inline _inline
+#endif
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -57,7 +60,7 @@ int main(int argc, char *argv[]) {
   // Find the first video stream
   videoStream=-1;
   for(i=0; i<pFormatCtx->nb_streams; i++)
-    if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO) {
+    if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_VIDEO) {
       videoStream=i;
       break;
     }
