@@ -25,6 +25,7 @@
 
 int main (int argc, char **argv)
 {
+  int counter = 0;
   char filename_buffer [255];
   
   fas_error_type video_error;
@@ -43,24 +44,23 @@ int main (int argc, char **argv)
   if (video_error != FAS_SUCCESS)
     fail("failed to open\n");
     
-  int counter = 0;
   while (fas_frame_available (context))
-    {
-            
-      if (FAS_SUCCESS != fas_get_frame (context, &image_buffer))
-	fail("failed on rgb image\n");  
+  {
+    char filename[50];
 
-      char filename[50];
-      sprintf(filename, "frame_%04d.ppm", counter);
-      
-      fprintf(stderr, "Writing %s (counter=%d frame_index=%d)\n", filename, counter, fas_get_frame_index(context));
-      ppm_save(&image_buffer, filename);
-      
-      fas_free_frame (image_buffer);
+    if (FAS_SUCCESS != fas_get_frame (context, &image_buffer))
+      fail("failed on rgb image\n");
 
-      video_error = fas_step_forward (context);
-      counter++;
-    }
+    sprintf(filename, "frame_%04d.ppm", counter);
+      
+    fprintf(stderr, "Writing %s (counter=%d frame_index=%d)\n", filename, counter, fas_get_frame_index(context));
+    ppm_save(&image_buffer, filename);
+      
+    fas_free_frame (image_buffer);
+
+    video_error = fas_step_forward (context);
+    counter++;
+  }
 
   success();
 
