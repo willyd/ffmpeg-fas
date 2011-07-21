@@ -28,6 +28,7 @@ The test/example build script requires ffmpeg be checked out (or symlinked) and 
 h3. Windows
 
 "Zeranoe FFmpeg builds":http://ffmpeg.zeranoe.com/builds
+"msinttypes -- ISO C9x compliant stdint.h and inttypes.h for Microsoft Visual Studio":http://code.google.com/p/msinttypes
 
 h2. Building
 
@@ -39,7 +40,9 @@ h3. Linux
 
 h3. Windows
 
-Build using the Visual Studio projects.
+* Install Zeranoe FFmpeg builds.
+* Install msinttypes.
+* Build using the Visual Studio projects.
 
 h2. Next Steps
 
