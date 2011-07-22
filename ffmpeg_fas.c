@@ -268,6 +268,10 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
     fas_close_video(fas_context);
     return private_show_error("failed to allocate rgb frame buffer", FAS_OUT_OF_MEMORY);
   }
+  int numBytes = avpicture_get_size(PIX_FMT_RGB24, fas_context->codec_context->width, fas_context->codec_context->height);
+  uint8_t* _buffer = (uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
+  avpicture_fill((AVPicture *)fas_context->rgb_frame_buffer, _buffer, PIX_FMT_RGB24, fas_context->codec_context->width, fas_context->codec_context->height);
+  av_free(_buffer);
   
   fas_context->gray8_frame_buffer = avcodec_alloc_frame();
   if (fas_context->gray8_frame_buffer == NULL)
@@ -438,7 +442,7 @@ int fas_get_frame_index (fas_context_ref_type context)
 
 /* fas_get_frame */
 
-fas_error_type fas_get_frame (fas_context_ref_type context, fas_raw_image_type *image_ptr)
+fas_error_type fas_get_frame(fas_context_ref_type context, fas_raw_image_type *image_ptr)
 {
   int buffer_size;
   fas_error_type fas_error;
