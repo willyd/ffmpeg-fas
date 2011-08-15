@@ -1,0 +1,29 @@
+This project requires CMake to build.
+http://cmake.org
+
+
+BUILDING FFMPEG-FAS
+
+LINUX:
+mkdir build
+cd build
+cmake ..
+
+
+WINDOWS: (using cmake gui)
+build dir: fas-root/build
+source dir: fas-root
+where fas-root is this folder.
+
+
+WINDOWS (using command prompt):
+md build
+cd build
+cmake ..
+
+To generate MSVC project files, you can use cmake-gui and select your version of MSVC, or use cmake .. -G <generator>.
+Use cmake --help to determine the correct generator.
+
+
+
+Tests are not part of this cmake system yet, but will be soon.
