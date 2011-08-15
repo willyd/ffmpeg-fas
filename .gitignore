@@ -20,6 +20,7 @@
 *.lib
 *.sbr
 *.scc
+[Bb]uild/
 [Bb]in
 [Dd]ebug*/
 obj/
