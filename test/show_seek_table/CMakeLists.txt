@@ -1,0 +1,3 @@
+
+add_executable(show_seek_table show_seek_table.c)
+ffmpeg_fas_config_test(show_seek_table)
