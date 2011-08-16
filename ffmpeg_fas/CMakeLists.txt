@@ -17,4 +17,4 @@ seek_indices.h )
 add_library(ffmpeg_fas SHARED ${FFMPEG_FAS_SOURCES} ${FFMPEG_FAS_HEADERS})
 
 set_target_properties(ffmpeg_fas PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${FFMPEG_FAS_LIBRARY_OUTPUT})
-target_link_libraries(ffmpeg_fas avcodec avformat avutil swscale)
+target_link_libraries(ffmpeg_fas ${FFMPEG_LIBRARIES} ${FFMPEG_LIBSWSCALE_LIBRARIES} )

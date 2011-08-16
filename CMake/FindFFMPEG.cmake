@@ -15,88 +15,57 @@
 # 
 # Created by Robert Osfield. 
 
-#use pkg-config to find various modes 
-INCLUDE(FindPkgConfig OPTIONAL) 
 
-IF(PKG_CONFIG_FOUND) 
-
-INCLUDE(FindPkgConfig)
-
-pkg_check_modules(FFMPEG_LIBAVFORMAT libavformat) 
-pkg_check_modules(FFMPEG_LIBAVDEVICE libavdevice) 
-pkg_check_modules(FFMPEG_LIBAVCODEC libavcodec) 
-pkg_check_modules(FFMPEG_LIBAVUTIL libavutil) 
-pkg_check_modules(FFMPEG_LIBSWSCALE libswscale) 
-
-ENDIF(PKG_CONFIG_FOUND) 
-
-# If FFMPEG was not found with pkgconfig, try to find it through other means. 
 IF(NOT FFMPEG_LIBAVFORMAT_FOUND) 
+
+SET(FFMPEG_INCLUDE_SEARCH_DIRS 
+	${FFMPEG_ROOT}/include 
+	$ENV{FFMPEG_DIR}/include
+	~/Library/Frameworks 
+	/Library/Frameworks 
+	/usr/local/include 
+	/usr/include/ 
+	/sw/include # Fink 
+	/opt/local/include # DarwinPorts 
+	/opt/csw/include # Blastwave 
+	/opt/include 
+	/usr/freeware/include 
+)
+
+SET(FFMPEG_LIBRARY_SEARCH_DIRS
+	${FFMPEG_ROOT}/lib 
+	$ENV{FFMPEG_DIR}/lib 
+	~/Library/Frameworks 
+	/Library/Frameworks 
+	/usr/local/lib 
+	/usr/local/lib64 
+	/usr/lib 
+	/usr/lib64 
+	/sw/lib 
+	/opt/local/lib 
+	/opt/csw/lib 
+	/opt/lib 
+	/usr/freeware/lib64 
+)
 
 # Macro to find header and lib directories 
 # example: FFMPEG_FIND(AVFORMAT avformat avformat.h) 
 MACRO(FFMPEG_FIND varname shortname headername) 
-# First try to find header directly in include directory 
-FIND_PATH(FFMPEG_${varname}_INCLUDE_DIRS ${headername} 
-${FFMPEG_ROOT}/include 
-$ENV{FFMPEG_DIR}/include 
-$ENV{OSGDIR}/include 
-$ENV{OSG_ROOT}/include 
-~/Library/Frameworks 
-/Library/Frameworks 
-/usr/local/include 
-/usr/include/ 
-/sw/include # Fink 
-/opt/local/include # DarwinPorts 
-/opt/csw/include # Blastwave 
-/opt/include 
-/usr/freeware/include 
-) 
+	# First try to find header directly in include directory 
+	FIND_PATH(FFMPEG_${varname}_INCLUDE_DIRS ${headername} ${FFMPEG_INCLUDE_SEARCH_DIRS}) 
 
-# If not found, try to find it in a subdirectory. Tanguy's build has 
-# avformat.h in include/libavformat, so this catches that case. If that's 
-# standard, perhaps we can keep just this case. 
-IF(NOT FFMPEG_${varname}_INCLUDE_DIRS) 
-FIND_PATH(FFMPEG_${varname}_INCLUDE_DIRS lib${shortname}/${headername} 
-${FFMPEG_ROOT}/include 
-$ENV{FFMPEG_DIR}/include 
-$ENV{OSGDIR}/include 
-$ENV{OSG_ROOT}/include 
-~/Library/Frameworks 
-/Library/Frameworks 
-/usr/local/include 
-/usr/include/ 
-/sw/include # Fink 
-/opt/local/include # DarwinPorts 
-/opt/csw/include # Blastwave 
-/opt/include 
-/usr/freeware/include 
-) 
-ENDIF(NOT FFMPEG_${varname}_INCLUDE_DIRS) 
+	# If not found, try to find it in a subdirectory. Tanguy's build has 
+	# avformat.h in include/libavformat, so this catches that case. If that's 
+	# standard, perhaps we can keep just this case. 
+	IF(NOT FFMPEG_${varname}_INCLUDE_DIRS) 
+		FIND_PATH(FFMPEG_${varname}_INCLUDE_DIRS lib${shortname}/${headername} ${FFMPEG_INCLUDE_SEARCH_DIRS}) 
+	ENDIF(NOT FFMPEG_${varname}_INCLUDE_DIRS) 
 
-FIND_LIBRARY(FFMPEG_${varname}_LIBRARIES 
-NAMES ${shortname} 
-PATHS 
-${FFMPEG_ROOT}/lib 
-$ENV{FFMPEG_DIR}/lib 
-$ENV{OSGDIR}/lib 
-$ENV{OSG_ROOT}/lib 
-~/Library/Frameworks 
-/Library/Frameworks 
-/usr/local/lib 
-/usr/local/lib64 
-/usr/lib 
-/usr/lib64 
-/sw/lib 
-/opt/local/lib 
-/opt/csw/lib 
-/opt/lib 
-/usr/freeware/lib64 
-) 
+	FIND_LIBRARY(FFMPEG_${varname}_LIBRARIES NAMES ${shortname} PATHS ${FFMPEG_LIBRARY_SEARCH_DIRS}) 
 
-IF (FFMPEG_${varname}_LIBRARIES) 
-SET(FFMPEG_${varname}_FOUND 1) 
-ENDIF(FFMPEG_${varname}_LIBRARIES) 
+	IF (FFMPEG_${varname}_LIBRARIES) 
+		SET(FFMPEG_${varname}_FOUND 1) 
+	ENDIF(FFMPEG_${varname}_LIBRARIES) 
 
 ENDMACRO(FFMPEG_FIND) 
 
