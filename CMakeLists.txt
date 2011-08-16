@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+set (FFMPEG_FAS_BUILD_TESTS 1 CACHE BOOL "Set ON to build tests")
+
 project(FFMPEG_FAS)
 
 set(CMAKE_MODULE_PATH "${FFMPEG_FAS_SOURCE_DIR}/CMake")
@@ -10,4 +12,7 @@ set(FFMPEG_FAS_RUNTIME_OUTPUT "${FFMPEG_FAS_BINARY_DIR}/bin")
 set(FFMPEG_FAS_LIBRARY_OUTPUT "${FFMPEG_FAS_BINARY_DIR}/lib")
 
 add_subdirectory(ffmpeg_fas)
-add_subdirectory(test)
+
+if(${FFMPEG_FAS_BUILD_TESTS})
+	add_subdirectory(test)
+endif(${FFMPEG_FAS_BUILD_TESTS})
