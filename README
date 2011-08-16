@@ -1,29 +1,34 @@
-This project requires CMake to build.
+ffmpeg-fas requires CMake to build.
 http://cmake.org
 
+================
+1. DEPENDENCIES:
+ffmpeg - ffmpeg.org
+Most Linux boxes should have this.  To build, you'll need the ffmpeg "dev" package (or whatever your distro calls the headers)
+installed as well.
 
-BUILDING FFMPEG-FAS
+On Windows, you'll need the Dev builds at http://ffmpeg.zeranoe.com/builds/ .
+
+
+
+======================
+2. BUILDING FFMPEG-FAS:
 
 LINUX:
 mkdir build
 cd build
 cmake ..
 
-
-WINDOWS: (using cmake gui)
+WINDOWS:
+(using cmake gui)
 build dir: fas-root/build
 source dir: fas-root
 where fas-root is this folder.
+Note: You'll need to set the variable FFMPEG_ROOT to point to
+the folder with FFMPEG installed.
 
-
-WINDOWS (using command prompt):
-md build
-cd build
-cmake ..
 
 To generate MSVC project files, you can use cmake-gui and select your version of MSVC, or use cmake .. -G <generator>.
 Use cmake --help to determine the correct generator.
 
-
-
-Tests are not part of this cmake system yet, but will be soon.
+Install routines are not yet implemented.
