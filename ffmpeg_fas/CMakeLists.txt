@@ -17,7 +17,7 @@ if(MSVC)
 include_directories(${FFMPEG_INCLUDE_DIRS} ${MSINTTYPES_INCLUDE_DIR})
 else(MSVC)
 include_directories(${FFMPEG_INCLUDE_DIRS})
-endif(MSVC
+endif(MSVC)
 
 add_library(ffmpeg_fas SHARED ${FFMPEG_FAS_SOURCES} ${FFMPEG_FAS_HEADERS})
 
