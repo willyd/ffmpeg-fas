@@ -11,3 +11,7 @@ add_subdirectory(dump_keyframes)
 add_subdirectory(movie_info)
 add_subdirectory(seek_test)
 add_subdirectory(show_seek_table)
+
+add_subdirectory(external_seek_test)
+add_subdirectory(generate_seek_table)
+

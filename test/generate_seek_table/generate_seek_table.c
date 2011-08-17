@@ -32,7 +32,7 @@
 
 int main (int argc, char **argv)
 {
-  av_log_level = AV_LOG_QUIET;
+  //av_log_level = AV_LOG_QUIET;
 
   if (argc < 2) {
     fprintf (stderr, "usage: %s <video_file>\n", argv[0]);
