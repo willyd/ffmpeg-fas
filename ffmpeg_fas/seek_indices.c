@@ -442,7 +442,7 @@ seek_error_type generate_seek_table(const char * filename, seek_table_type * tab
 	      else
 		key_packet_dts = prev_packet_dts;
 
-	      if (Packet.flags & PKT_FLAG_KEY)
+	      if (Packet.flags & AV_PKT_FLAG_KEY)
 		key_packets++;
 	      else
 		non_key_packets++;
@@ -457,7 +457,7 @@ seek_error_type generate_seek_table(const char * filename, seek_table_type * tab
 	    {
 
 	      //	      fprintf(stderr, "Frame : (P%d F%d: %lld %lld L:%d)\n", count, frame_count, Packet.pts, Packet.dts, pFrame->key_frame);
-	      if ((pFrame->key_frame && frames_have_label) || ((Packet.flags & PKT_FLAG_KEY) && !frames_have_label))
+	      if ((pFrame->key_frame && frames_have_label) || ((Packet.flags & AV_PKT_FLAG_KEY) && !frames_have_label))
 		{
 		  key_frames++;
 
