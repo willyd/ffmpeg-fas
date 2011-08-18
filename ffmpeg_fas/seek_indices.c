@@ -342,7 +342,7 @@ seek_error_type generate_seek_table(const char * filename, seek_table_type * tab
   unsigned int i;
 
   for (i = 0; i < pFormatCtx->nb_streams; i++)
-    if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO)
+    if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
       {
 	stream_id = i;
 	break;
@@ -419,7 +419,7 @@ seek_error_type generate_seek_table(const char * filename, seek_table_type * tab
       if (Packet.stream_index == stream_id)
 	{
 	  //	  fprintf(stderr, "Packet: (P%d: %lld %lld %d)\n", count, Packet.pts, Packet.dts, Packet.flags);
-	  if ((Packet.flags & PKT_FLAG_KEY) || is_first_packet )
+	  if ((Packet.flags & AV_PKT_FLAG_KEY) || is_first_packet )
 	    {
 	      /* when keyframes overlap in the stream, that means multiple packets labeled 'keyframe' will arrive before
 		 the keyframe itself. this results in wrong assignments all around, but only the first one needs to be right.
