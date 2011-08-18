@@ -1,12 +1,12 @@
 /*****************************************************************************
  * Copyright 2008. Pittsburgh Pattern Recognition, Inc.
- * 
- * This file is part of the Frame Accurate Seeking extension library to 
+ *
+ * This file is part of the Frame Accurate Seeking extension library to
  * ffmpeg (ffmpeg-fas).
- * 
- * ffmpeg-fas is free software; you can redistribute it and/or modify it 
- * under the terms of the GNU Lesser General Public License as published by 
- * the Free Software Foundation; either version 3 of the License, or (at your 
+ *
+ * ffmpeg-fas is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at your
  * option) any later version.
  *
  * The ffmpeg-fas library is distributed in the hope that it will be useful, but
@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-#ifndef FAS_SEEK_INDICES_H 
+#ifndef FAS_SEEK_INDICES_H
 #define FAS_SEEK_INDICES_H
 
 #include <stdint.h>
@@ -89,6 +89,8 @@ __extern seek_error_type seek_show_raw_table (FILE *file, seek_table_type table)
 
 __extern seek_table_type read_table_file(char *name);                      /* read raw file */
 
-#endif 
+__extern seek_error_type generate_seek_table(const char * filename, seek_table_type * table);
+
+#endif
 
 /**** End of File *****************************************************/

@@ -1,12 +1,12 @@
 /*****************************************************************************
  * Copyright 2008. Pittsburgh Pattern Recognition, Inc.
- * 
- * This file is part of the Frame Accurate Seeking extension library to 
+ *
+ * This file is part of the Frame Accurate Seeking extension library to
  * ffmpeg (ffmpeg-fas).
- * 
- * ffmpeg-fas is free software; you can redistribute it and/or modify it 
- * under the terms of the GNU Lesser General Public License as published by 
- * the Free Software Foundation; either version 3 of the License, or (at your 
+ *
+ * ffmpeg-fas is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at your
  * option) any later version.
  *
  * The ffmpeg-fas library is distributed in the hope that it will be useful, but
@@ -22,12 +22,11 @@
 #include "ffmpeg_fas.h"
 
 #if defined( _WIN32 ) && defined( STATIC_DLL )
-extern "C" 
+extern "C"
 {
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
 #include "libswscale/swscale.h"
-int img_convert(AVPicture *dst, int dst_pix_fmt, const AVPicture *src, int src_pix_fmt, int src_width, int src_height);
 }
 #else
 #include "libavformat/avformat.h"
@@ -120,14 +119,14 @@ void fas_set_logging (fas_boolean_type logging)
 	  av_log_set_level(AV_LOG_INFO);
 #endif
     }
-  else 
+  else
     {
       SHOW_ERROR_MESSAGES = 0;
       SHOW_WARNING_MESSAGES = 0;
 #ifndef _WIN32
 	  av_log_set_level(AV_LOG_QUIET);
 #endif
-    }  
+    }
 }
 
 /* Set the output image colorspace */
@@ -177,7 +176,7 @@ void fas_initialize (fas_boolean_type logging, fas_color_space_type format)
   fas_set_logging(logging);
   fas_set_format(format);
   av_register_all();
-  
+
   return;
 }
 
@@ -192,10 +191,10 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
     return private_show_error("NULL context pointer provided", FAS_INVALID_ARGUMENT);
 
   *context_ptr = NULL; // set returned context to NULL in case of error
-  
+
   fas_context = (fas_context_ref_type) malloc(sizeof(fas_context_type));
   memset(fas_context, 0, sizeof(fas_context_type));
-  
+
   if (NULL == fas_context)
     return private_show_error("unable to allocate buffer", FAS_OUT_OF_MEMORY);
 
@@ -206,7 +205,7 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
   fas_context->previous_dts           = AV_NOPTS_VALUE;
   fas_context->keyframe_packet_dts    = AV_NOPTS_VALUE;
   fas_context->first_dts              = AV_NOPTS_VALUE;
-  fas_context->seek_table = seek_init_table(-1); /* default starting size */ 
+  fas_context->seek_table = seek_init_table(-1); /* default starting size */
 
   if (av_open_input_file(&(fas_context->format_context), file_path, NULL, 0, NULL ) != 0)
   {
@@ -223,7 +222,7 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
   if (SHOW_WARNING_MESSAGES)
     av_dump_format(fas_context->format_context, 0, file_path, 0);
 
-  for (stream_idx = 0; stream_idx < fas_context->format_context->nb_streams; stream_idx++) 
+  for (stream_idx = 0; stream_idx < fas_context->format_context->nb_streams; stream_idx++)
   {
     if (fas_context->format_context->streams[stream_idx]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
     {
@@ -232,7 +231,7 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
       break;
     }
   }
-  
+
   if (fas_context->codec_context == 0)
   {
     fas_close_video(fas_context);
@@ -247,21 +246,21 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
     fas_close_video(fas_context);
     return private_show_error("failed to find correct video codec", FAS_UNSUPPORTED_CODEC);
   }
-  
+
   if (avcodec_open(fas_context->codec_context, codec) < 0)
   {
     fas_context->codec_context = 0;
     fas_close_video(fas_context);
     return private_show_error("failed to open codec", FAS_UNSUPPORTED_CODEC);
   }
-  
+
   fas_context->frame_buffer = avcodec_alloc_frame();
   if (fas_context->frame_buffer == NULL)
   {
     fas_close_video(fas_context);
     return private_show_error("failed to allocate frame buffer", FAS_OUT_OF_MEMORY);
   }
-  
+
   fas_context->rgb_frame_buffer = avcodec_alloc_frame();
   if (fas_context->rgb_frame_buffer == NULL)
   {
@@ -271,14 +270,14 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
   int numBytes = avpicture_get_size(PIX_FMT_RGB24, fas_context->codec_context->width, fas_context->codec_context->height);
   fas_context->rgb_buffer = (uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
   avpicture_fill((AVPicture *)fas_context->rgb_frame_buffer, fas_context->rgb_buffer, PIX_FMT_RGB24, fas_context->codec_context->width, fas_context->codec_context->height);
-  
+
   fas_context->gray8_frame_buffer = avcodec_alloc_frame();
   if (fas_context->gray8_frame_buffer == NULL)
   {
     fas_close_video(fas_context);
     return private_show_error("failed to allocate gray8 frame buffer", FAS_OUT_OF_MEMORY);
   }
-  
+
   fas_context->rgb_buffer = 0;
   fas_context->gray8_buffer = 0;
   fas_context->rgb_already_converted = FAS_FALSE;
@@ -291,22 +290,22 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
 
   if (!fas_frame_available(*context_ptr))
     return private_show_error("couldn't find a first frame (no valid frames in video stream)", FAS_NO_MORE_FRAMES);
-  
+
   return FAS_SUCCESS;
 }
 
 /* fas_close_video */
 fas_error_type fas_close_video (fas_context_ref_type context)
 {
-  if (NULL == context) 
+  if (NULL == context)
     return private_show_error("NULL context provided for fas_close_video()", FAS_INVALID_ARGUMENT);
-  
-  if (!(context->is_video_active)) 
+
+  if (!(context->is_video_active))
     {
       private_show_warning ("Redundant attempt to close an inactive video");
       return FAS_SUCCESS;
     }
-  
+
   if (context->codec_context)
     if (avcodec_find_decoder (context->codec_context->codec_id))
       avcodec_close(context->codec_context);
@@ -322,17 +321,17 @@ fas_error_type fas_close_video (fas_context_ref_type context)
 
   if (context->rgb_buffer)
     av_free(context->rgb_buffer);
-  
+
   if (context->gray8_buffer)
     av_free(context->gray8_buffer);
-  
+
   if (context->frame_buffer)
     av_free (context->frame_buffer);
-    
-  seek_release_table (&(context->seek_table)); 
-  
+
+  seek_release_table (&(context->seek_table));
+
   context->is_video_active = FAS_FALSE;
-  
+
   free (context);
 
   return FAS_SUCCESS;
@@ -345,7 +344,7 @@ fas_error_type fas_step_forward (fas_context_ref_type context)
   if ((NULL == context) || (FAS_TRUE != context->is_video_active)) {
     return private_show_error("invalid or unopened context", FAS_INVALID_ARGUMENT);
   }
-  
+
   if (!context->is_frame_available)
     {
       private_show_warning ("tried to advance after end of frames");
@@ -359,66 +358,66 @@ fas_error_type fas_step_forward (fas_context_ref_type context)
     {
       if (av_read_frame(context->format_context, &packet) < 0)
 	{
-	  /* finished */      
+	  /* finished */
 	  context->is_frame_available = FAS_FALSE;
 	  context->seek_table.completed = seek_true;
 	  return FAS_SUCCESS;
 	}
-      
+
       int frameFinished;
       if (packet.stream_index == context->stream_idx)
 	{
 	  context->previous_dts = context->current_dts;
 	  context->current_dts = packet.dts;
-	  
+
 	  /* seek support: set first_dts */
 	  if (context->first_dts == AV_NOPTS_VALUE)
 	    context->first_dts = packet.dts;
-	  
+
 	  /* seek support: set key-packet info to previous packet's dts, when possible */
-	  /* note this -1 approach to setting the packet is a workaround for a common failure. setting 
+	  /* note this -1 approach to setting the packet is a workaround for a common failure. setting
 	     to 0 would work just incur a huge penalty in videos that needed -1. Might be worth testing.
 	  */
 	  if (packet.flags & AV_PKT_FLAG_KEY)
 	    {
 	      //fprintf(stderr, "Packet: (F:%d %lld %lld)\n", context->current_frame_index, packet.pts, packet.dts);
-	      
+
 	      if (context->previous_dts == AV_NOPTS_VALUE)
 		context->keyframe_packet_dts = packet.dts;
 	      else
 		context->keyframe_packet_dts = context->previous_dts;
 	    }
-	  
+
 	  avcodec_decode_video2(context->codec_context, context->frame_buffer, &frameFinished, &packet);
-	  
+
 	  if (frameFinished)
 	    {
 	      /* seek support: (try to) add entry to seek_table */
 	      if (context->frame_buffer->key_frame)
 		{
 		  //		fprintf(stderr, "Frame : (PXX F%d: %lld %lld)\n", context->current_frame_index, packet.pts, packet.dts);
-		  
+
 		  seek_entry_type entry;
 		  entry.display_index = context->current_frame_index;
 		  entry.first_packet_dts = context->keyframe_packet_dts;
 		  entry.last_packet_dts = packet.dts;
-		  
+
 		  if (fas_get_frame_index(context) == FIRST_FRAME_INDEX)
 		    entry.first_packet_dts = context->first_dts;
-		  
-		  seek_append_table_entry(&context->seek_table, entry);	     
+
+		  seek_append_table_entry(&context->seek_table, entry);
 		}
-	      
+
 	      if (context->current_frame_index - FIRST_FRAME_INDEX + 1 > context->seek_table.num_frames)
 		context->seek_table.num_frames = context->current_frame_index - FIRST_FRAME_INDEX + 1;
-	      
+
 	      break;
 	    }
 	}
-      
+
       av_free_packet(&packet);
     }
-  
+
   context->rgb_already_converted = FAS_FALSE;
   context->gray8_already_converted = FAS_FALSE;
   av_free_packet(&packet);
@@ -432,9 +431,9 @@ int fas_get_frame_index (fas_context_ref_type context)
   if (NULL == context)
     return private_show_error("NULL context provided for fas_get_frame_index()", FAS_INVALID_ARGUMENT);
 
-  if (FAS_TRUE != context->is_video_active) 
+  if (FAS_TRUE != context->is_video_active)
     return private_show_error("No video is open for fas_get_frame_index()", FAS_INVALID_ARGUMENT);
-  
+
   return context->current_frame_index;
 }
 
@@ -451,7 +450,7 @@ fas_error_type fas_get_frame(fas_context_ref_type context, fas_raw_image_type *i
 
   if (NULL == image_ptr)
     return private_show_error("null image_ptr on get_frame", FAS_INVALID_ARGUMENT);
-  
+
   if (!fas_frame_available(context))
     return private_show_error("no frame available for extraction", FAS_NO_MORE_FRAMES);
 
@@ -506,7 +505,7 @@ fas_error_type fas_get_frame(fas_context_ref_type context, fas_raw_image_type *i
   image_ptr->width          = context->codec_context->width;
   image_ptr->height         = context->codec_context->height;
 
-  
+
   fas_error = private_convert_to_rgb(context);
 
   int j;
@@ -516,7 +515,7 @@ fas_error_type fas_get_frame(fas_context_ref_type context, fas_raw_image_type *i
     {
       from = context->rgb_frame_buffer->data[0] + j*context->rgb_frame_buffer->linesize[0];
       to = image_ptr->data + j*image_ptr->bytes_per_line;
-      
+
       memcpy(to, from, image_ptr->bytes_per_line);
     }
 
@@ -530,15 +529,15 @@ fas_error_type fas_get_frame(fas_context_ref_type context, fas_raw_image_type *i
 
 void fas_free_frame (fas_raw_image_type image)
 {
-  if (NULL == image.data) 
+  if (NULL == image.data)
     return;
-  
+
   free (image.data);
-  
+
   return;
 }
 
-/* fas_get_seek_table */ 
+/* fas_get_seek_table */
 seek_table_type fas_get_seek_table (fas_context_ref_type context)
 {
   seek_table_type null_table;
@@ -551,22 +550,22 @@ seek_table_type fas_get_seek_table (fas_context_ref_type context)
 
   if (NULL == context || FAS_FALSE == context->is_video_active)
     return null_table;
-    
+
   return context->seek_table;
 }
 
-/* fas_put_seek_table */  
+/* fas_put_seek_table */
 fas_error_type fas_put_seek_table (fas_context_ref_type context, seek_table_type table)
 {
   if (NULL == context || FAS_FALSE == context->is_video_active)
     return private_show_error("null context or inactive video", FAS_INVALID_ARGUMENT);
-  
+
   seek_release_table (&context->seek_table);
   context->seek_table = seek_copy_table(table);
-  
+
   return FAS_SUCCESS;
 }
- 
+
 /* private_complete_seek_table */
 fas_error_type private_complete_seek_table (fas_context_ref_type context)
 {
@@ -605,14 +604,14 @@ fas_error_type fas_seek_to_frame (fas_context_ref_type context, int target_index
   if (target_index == context->current_frame_index)
     return FAS_SUCCESS;
 
-  fas_error = fas_seek_to_nearest_key (context, target_index); 
+  fas_error = fas_seek_to_nearest_key (context, target_index);
 
   if (fas_error != FAS_SUCCESS)
     return private_show_error("error advancing to key frame before seek", fas_error);
 
   if (fas_get_frame_index(context) > target_index)
     return private_show_error("error advancing to key frame before seek (index isn't right)", fas_error);
- 
+
   while (fas_get_frame_index(context) < target_index)
     {
       if (fas_frame_available(context))
@@ -644,7 +643,7 @@ fas_error_type private_seek_to_nearest_key (fas_context_ref_type context, int ta
   fas_error_type fas_error;
   seek_entry_type seek_entry;
   seek_error_type seek_error = seek_get_nearest_entry(&(context->seek_table), &seek_entry, target_index, offset);
-  
+
   if (seek_error != seek_no_error)
     return private_show_error("error while searching seek table", FAS_SEEK_ERROR);
 
@@ -663,22 +662,22 @@ fas_error_type private_seek_to_nearest_key (fas_context_ref_type context, int ta
   int flags = 0;
   if (seek_entry.first_packet_dts <= context->current_dts)
     flags = AVSEEK_FLAG_BACKWARD;
-  
+
   //  printf("av_seek_frame: %lld\n", seek_entry.first_packet_dts);
   if (av_seek_frame(context->format_context, context->stream_idx, seek_entry.first_packet_dts, flags) < 0)
     return private_show_error("seek to keyframe failed", FAS_SEEK_ERROR);
 
   avcodec_flush_buffers (context->codec_context);
-  
-  fas_error = fas_step_forward (context);  
 
-  if (fas_error != FAS_SUCCESS || !context->is_frame_available)  
+  fas_error = fas_step_forward (context);
+
+  if (fas_error != FAS_SUCCESS || !context->is_frame_available)
   {
     // something bad has happened, try previous keyframe
     private_show_warning("processing of seeked keyframe failed, trying previous keyframe");
     return private_seek_to_nearest_key(context, target_index, offset + 1);
   }
-  
+
   while (context->current_dts < seek_entry.last_packet_dts)
   {
 #ifdef _DEBUG
@@ -693,7 +692,7 @@ fas_error_type private_seek_to_nearest_key (fas_context_ref_type context, int ta
   printf("keyframe vitals: %d looking_for: %lld at: %lld\n", seek_entry.display_index, seek_entry.last_packet_dts, context->current_dts);
 #endif
   if (context->current_dts != seek_entry.last_packet_dts)
-  {      
+  {
     /* seek to last key-frame, but look for this one */
     private_show_warning("missed keyframe, trying previous keyframe");
     return private_seek_to_nearest_key(context, target_index, offset + 1);
@@ -710,7 +709,7 @@ fas_error_type private_seek_to_nearest_key (fas_context_ref_type context, int ta
    *    we need to allow seeking to frame 0 even when it's not labeled as a
    *    keyframe. Messy set of conditions.
    */
-  
+
   if ((!context->frame_buffer->key_frame) && (seek_entry.display_index != 0))
   {
     private_show_warning("found keyframe, but not labeled as keyframe, so trying previous keyframe.");
@@ -728,16 +727,16 @@ fas_error_type private_seek_to_nearest_key (fas_context_ref_type context, int ta
 
 int fas_get_frame_count_fast (fas_context_ref_type context)
 {
-  
-  if (NULL == context || FAS_FALSE == context->is_video_active) 
+
+  if (NULL == context || FAS_FALSE == context->is_video_active)
     {
       private_show_error("NULL or invalid context", FAS_INVALID_ARGUMENT);
       return -1;
     }
-  
+
   if (context->seek_table.completed == seek_true)
     return context->seek_table.num_frames;
-  
+
   return -1;
 }
 
@@ -751,7 +750,7 @@ int fas_get_frame_count (fas_context_ref_type context)
 
   fas_error_type fas_error;
 
-  fas_error = private_complete_seek_table(context); 
+  fas_error = private_complete_seek_table(context);
   if (FAS_SUCCESS != fas_error)
   {
     private_show_error("failed in get_frame_count trying to complete the seek table", fas_error);
@@ -766,11 +765,11 @@ int fas_get_frame_count (fas_context_ref_type context)
     private_show_error("failed in get_frame_count when trying to seek back to original location", fas_error);
     return -1;
   }
-  
+
   fast = fas_get_frame_count_fast(context);
   if (fast < 0)
     private_show_warning("get_frame_count failed");
-  
+
   return fast;
 }
 
@@ -778,7 +777,7 @@ int fas_get_frame_count (fas_context_ref_type context)
 
 fas_boolean_type fas_frame_available (fas_context_ref_type context)
 {
-  if (NULL == context) 
+  if (NULL == context)
     {
       private_show_error("NULL context provided for fas_get_frame_index()", FAS_INVALID_ARGUMENT);
       return FAS_FALSE;
@@ -800,7 +799,7 @@ static fas_error_type private_show_error(const char *message, fas_error_type err
   return error;
 }
 
-static void private_show_warning (const char *message) 
+static void private_show_warning (const char *message)
 {
   if (SHOW_WARNING_MESSAGES)
     fprintf (stderr, " ---- ffmpeg_fas: %s\n", message);
@@ -815,7 +814,7 @@ fas_error_type private_convert_to_rgb (fas_context_ref_type ctx)
   static struct SwsContext *img_convert_ctx;
   int w = ctx->codec_context->width;
   int h = ctx->codec_context->height;
-  
+
   img_convert_ctx = sws_getContext(w, h, ctx->codec_context->pix_fmt,
                                    w, h, fmt, SWS_BICUBIC,
                                    NULL, NULL, NULL);
@@ -843,7 +842,7 @@ fas_error_type private_convert_to_gray8 (fas_context_ref_type ctx)
   static struct SwsContext *img_convert_ctx;
   int w = ctx->codec_context->width;
   int h = ctx->codec_context->height;
-  
+
   img_convert_ctx = sws_getContext(w, h, ctx->codec_context->pix_fmt,
                                    w, h, PIX_FMT_GRAY8, SWS_BICUBIC,
                                    NULL, NULL, NULL);
@@ -875,7 +874,7 @@ int fas_get_current_height(fas_context_ref_type context)
 
 unsigned long long fas_get_frame_duration(fas_context_ref_type context)
 {
-    if (context->format_context->streams[context->stream_idx]->time_base.den != context->format_context->streams[context->stream_idx]->r_frame_rate.num 
+    if (context->format_context->streams[context->stream_idx]->time_base.den != context->format_context->streams[context->stream_idx]->r_frame_rate.num
 		|| context->format_context->streams[context->stream_idx]->time_base.num != context->format_context->streams[context->stream_idx]->r_frame_rate.den)
 	{
 		double frac = (double)(context->format_context->streams[context->stream_idx]->r_frame_rate.den) / (double)(context->format_context->streams[context->stream_idx]->r_frame_rate.num);
@@ -899,14 +898,14 @@ fas_error_type fas_fill_gray8_ptr(fas_context_ref_type context, unsigned char *y
   int i;
   for (i=0;i < height; i++)
     memcpy(y + width * i, context->gray8_frame_buffer->data[0] + context->gray8_frame_buffer->linesize[0] * i, width);
-  
+
   return FAS_SUCCESS;
 }
 
 fas_error_type  fas_fill_420p_ptrs (fas_context_ref_type context, unsigned char *y, unsigned char *u, unsigned char *v)
 {
   AVFrame *p = context->frame_buffer;
-  
+
   /* 411p to 420p conversion fails!? ... so i left this -ldb */
   if (context->codec_context->pix_fmt != PIX_FMT_YUV420P)
     return FAS_FAILURE;
@@ -921,6 +920,6 @@ fas_error_type  fas_fill_420p_ptrs (fas_context_ref_type context, unsigned char 
       memcpy(u + width / 2 * i, p->data[1] + p->linesize[1] * i, width / 2);
       memcpy(v + width / 2 * i, p->data[2] + p->linesize[2] * i, width / 2);
     }
-  
+
   return FAS_SUCCESS;
 }
