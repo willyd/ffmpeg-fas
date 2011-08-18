@@ -451,7 +451,7 @@ seek_error_type generate_seek_table(const char * filename, seek_table_type * tab
 	    non_key_packets++;
 
 
-	  avcodec_decode_video(pCodecCtx, pFrame, &frameFinished, Packet.data, Packet.size);
+	  avcodec_decode_video2(pCodecCtx, pFrame, &frameFinished, &Packet);
 
 	  if (frameFinished)
 	    {
