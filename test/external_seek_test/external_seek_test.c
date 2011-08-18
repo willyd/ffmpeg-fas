@@ -88,7 +88,7 @@ void do_random_test(fas_context_ref_type context, int start, int stop, int count
 
   for (i=0;i<count;i++)
     {
-      int offset = random() % (stop - start + 1);
+      int offset = rand() % (stop - start + 1);
       prev_index = index;
       index = start + offset;
 
