@@ -19,6 +19,10 @@
  *
  ******************************************************************************/
 
+#ifdef _MSC_VER
+#define inline __inline
+#endif
+
 #if defined( _WIN32 ) && defined( STATIC_DLL )
 extern "C"
 {
@@ -32,6 +36,7 @@ extern "C"
 #include "libavutil/log.h"
 #include "libswscale/swscale.h"
 #endif /*  _WIN32 && STATIC_DLL */
+#undef inline
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -127,6 +132,7 @@ void seek_release_table (seek_table_type *table)
 
 seek_table_type seek_copy_table (seek_table_type source)
 {
+  int i;
   seek_table_type dest;
   dest.num_entries = source.num_entries;
   dest.num_frames  = source.num_frames;
@@ -150,7 +156,6 @@ seek_table_type seek_copy_table (seek_table_type source)
 
   dest.allocated_size = source.num_entries;
 
-  int i;
   for (i=0;i<source.num_entries;i++)
     dest.array[i] = source.array[i];
 
@@ -185,6 +190,8 @@ seek_error_type seek_append_table_entry (seek_table_type *table, seek_entry_type
  */
 seek_error_type seek_get_nearest_entry (seek_table_type *table, seek_entry_type *entry, int display_index, int offset)
 {
+  int i;
+
   if (NULL == table || NULL == table->array || table->num_entries <= 0) {
     return private_show_error("NULL or invalid seek table", seek_bad_argument);
   }
@@ -196,7 +203,6 @@ seek_error_type seek_get_nearest_entry (seek_table_type *table, seek_entry_type 
   if (display_index < table->array[0].display_index)
     return private_show_error("tried to seek to frame index before first frame", seek_bad_argument);
 
-  int i;
   for (i=0; i < table->num_entries; i++)
     if (table->array[i].display_index > display_index)
       break;
@@ -217,12 +223,14 @@ seek_error_type seek_get_nearest_entry (seek_table_type *table, seek_entry_type 
 seek_table_type read_table_file(char *name)
 {
   seek_table_type ans = { NULL, (seek_boolean_type) 0, (seek_boolean_type) 0 };
+  int i;
+  int completed_flag;
 
   FILE *table_file = fopen(name, "r");
+
   if (table_file == NULL)
     return ans;
 
-  int completed_flag;
   fscanf(table_file, "%d %d %d\n", &ans.num_frames, &ans.num_entries, &completed_flag);
 
   if (completed_flag == 1)
@@ -233,7 +241,6 @@ seek_table_type read_table_file(char *name)
   ans.allocated_size = ans.num_entries;
   ans.array = (seek_entry_type*) malloc (ans.allocated_size * sizeof(seek_entry_type));
 
-  int i;
   for (i=0;i<ans.num_entries;i++)
     fscanf(table_file, "%d %lld %lld\n", &(ans.array[i].display_index), &(ans.array[i].first_packet_dts), &(ans.array[i].last_packet_dts));
 
@@ -244,12 +251,12 @@ seek_table_type read_table_file(char *name)
 seek_error_type seek_show_raw_table (FILE* file, seek_table_type table)
 {
   seek_entry_type *entry;
+  int completed_flag = 0;
   int index;
 
   if (NULL == table.array || table.num_entries <= 0)
     return private_show_error("NULL or invalid seek table", seek_bad_argument);
 
-  int completed_flag = 0;
   if (table.completed == seek_true)
     completed_flag = 1;
 
@@ -267,12 +274,12 @@ seek_error_type seek_show_table (seek_table_type table)
 {
   seek_entry_type *entry;
   int index;
+  int completed_flag = 0;
 
   if (NULL == table.array || table.num_entries <= 0) {
     return private_show_error("NULL or invalid seek table", seek_bad_argument);
   }
 
-  int completed_flag = 0;
   if (table.completed == seek_true)
     completed_flag = 1;
 
@@ -328,41 +335,8 @@ static seek_error_type private_resize_table (seek_table_type *table, int new_siz
   return seek_no_error;
 }
 
-
-seek_error_type generate_seek_table(const char * filename, seek_table_type * table)
-{
-  AVFormatContext *pFormatCtx;
-  if (av_open_input_file(&pFormatCtx, filename, NULL, 0, NULL) !=0)
-    return -1;
-
-  if (av_find_stream_info(pFormatCtx)<0)
-    return -1;
-
-  unsigned int stream_id = -1;
-  unsigned int i;
-
-  for (i = 0; i < pFormatCtx->nb_streams; i++)
-    if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
-      {
-	stream_id = i;
-	break;
-      }
-
-  if (stream_id == -1)
-    return -1;
-
-  AVCodecContext *pCodecCtx = pFormatCtx->streams[stream_id]->codec;
-  AVCodec *pCodec;
-  pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
-  if (pCodec==NULL)
-    return -1;
-
-  if (avcodec_open(pCodecCtx, pCodec)<0)
-    return -1;
-
-
-  //    printf("\n%s \n",argv[1]);
-
+void generate_seek_table_main(AVFormatContext * pFormatCtx, AVCodecContext * pCodecCtx, int stream_id, seek_table_type * table)
+{ 
   AVPacket Packet;
   int count = 0;
   int key_packets = 0;
@@ -373,11 +347,8 @@ seek_error_type generate_seek_table(const char * filename, seek_table_type * tab
   int non_key_frames = 0;
 
   AVFrame *pFrame;
-  pFrame=avcodec_alloc_frame();
   int frameFinished;
 
-  //seek_table_type table;
-  //table = seek_init_table (16);
   seek_entry_type entry;
 
   int64_t key_packet_dts;
@@ -387,32 +358,8 @@ seek_error_type generate_seek_table(const char * filename, seek_table_type * tab
   int is_first_packet = 1;
   int frames_have_label = 1;
 
-  //  const char *format_name = pFormatCtx->iformat->name;
-  //  const char *codec_name = pFormatCtx->streams[stream_id]->codec->codec->name;
 
-
-  /* these avi formats do not have labeled keyframes (the packets are labeled only and the packets and keyframe align 1-to-1 */
-  /* DISABLING THIS TYPE OF GENERATION (these videos will be unseekable) */
-  //  fprintf(stderr, "format: (%s) codec: (%s)\n", format_name, codec_name);
-/*
- *   if (!strcmp(format_name, "avi"))
- *     if (!strcmp(codec_name, "aasc")        ||
- * 	!strcmp(codec_name, "camtasia")    ||
- * 	!strcmp(codec_name, "cinepak")     ||
- * 	!strcmp(codec_name, "cyuv")        ||
- * 	!strcmp(codec_name, "huffyuv")     ||
- * 	!strcmp(codec_name, "indeo2")      ||
- * 	!strcmp(codec_name, "indeo3")      ||
- * 	!strcmp(codec_name, "msrle")       ||
- * 	!strcmp(codec_name, "msvideo1")    ||
- * 	!strcmp(codec_name, "mszh")        ||
- * 	!strcmp(codec_name, "qpeg")        ||
- * 	!strcmp(codec_name, "truemotion1") ||
- * 	!strcmp(codec_name, "ultimotion")  ||
- * 	!strcmp(codec_name, "vp3")         ||
- * 	!strcmp(codec_name, "zlib"))
- *       frames_have_label = 0;
- */
+  pFrame=avcodec_alloc_frame();
 
   while (av_read_frame(pFormatCtx, &Packet) >= 0)
     {
@@ -483,15 +430,58 @@ seek_error_type generate_seek_table(const char * filename, seek_table_type * tab
 	}
 
       av_free_packet(&Packet);
-    }
+  }
+  fprintf (stderr, "Packets: key: %d  nonkey: %d   total: %d\n", key_packets, non_key_packets, count);
+  fprintf (stderr, "Frames : key: %d  nonkey: %d   total: %d\n", key_frames, non_key_frames, frame_count);
+  table->completed = seek_true;
+  table->num_frames = frame_count;
+}
+
+seek_error_type generate_seek_table(const char * filename, seek_table_type * table)
+{
+  AVFormatContext *pFormatCtx;
+  AVCodecContext *pCodecCtx;
+  AVCodec *pCodec;
+
+  unsigned int stream_id = -1;
+  unsigned int i;
+
+  if (av_open_input_file(&pFormatCtx, filename, NULL, 0, NULL) !=0)
+    return -1;
+
+  if (av_find_stream_info(pFormatCtx)<0)
+    return -1;
+
+
+  for (i = 0; i < pFormatCtx->nb_streams; i++)
+    if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+      {
+	stream_id = i;
+	break;
+      }
+
+  if (stream_id == -1)
+    return -1;
+
+  pCodecCtx = pFormatCtx->streams[stream_id]->codec;
+  
+  pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
+  if (pCodec==NULL)
+    return -1;
+
+  if (avcodec_open(pCodecCtx, pCodec)<0)
+    return -1;
+
+
+  //    printf("\n%s \n",argv[1]);
+
+  
+  generate_seek_table_main(pFormatCtx, pCodecCtx, stream_id, table);
+  
 
   //  printf("\n");
 
-  fprintf (stderr, "Packets: key: %d  nonkey: %d   total: %d\n", key_packets, non_key_packets, count);
-  fprintf (stderr, "Frames : key: %d  nonkey: %d   total: %d\n", key_frames, non_key_frames, frame_count);
 
-  table->completed = seek_true;
-  table->num_frames = frame_count;
 
   seek_show_raw_table(stdout, *table);
 

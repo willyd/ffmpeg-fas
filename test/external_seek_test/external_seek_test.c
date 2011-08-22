@@ -36,14 +36,15 @@ int compare_frames(fas_raw_image_type img1, fas_raw_image_type img2)
   // img1.bytes_per_line, img2.bytes_per_line,
   // img1.color_space, img2.color_space);
   
+  int i,j;
+  int mask = 0;
+
   if ((img1.width  != img2.width) ||
       (img1.height != img2.height) || 
       (img1.bytes_per_line != img2.bytes_per_line) || 
       (img1.color_space != img2.color_space))
     return 0;
 
-  int i,j;
-  int mask = 0;
 
   for (i=0;i<img1.height;i++)
     for(j=0;j<img1.bytes_per_line;j++)
@@ -62,14 +63,24 @@ void do_random_test(fas_context_ref_type context, int start, int stop, int count
 {
   //  printf ("start: %d  stop: %d\n", start, stop );
 
+  int i;
+  fas_error_type video_error;
+  fas_raw_image_type *ref_frames;
+  fas_raw_image_type test_frame;
+
+  int index = -1;
+  int prev_index;
+  
+  int offset;
+
+  char buffer[70];
+
   while (fas_get_frame_index(context) < start)
     if (FAS_SUCCESS != fas_step_forward(context))
       fail("failed on advancement\n");
 
-  fas_raw_image_type *ref_frames = malloc( (stop - start + 1)* sizeof(fas_raw_image_type));
+  ref_frames = malloc( (stop - start + 1)* sizeof(fas_raw_image_type));
   
-  int i;
-  fas_error_type video_error;
 
   while (fas_get_frame_index(context) <= stop)
     {
@@ -83,12 +94,10 @@ void do_random_test(fas_context_ref_type context, int start, int stop, int count
 
     }
 
-  int index = -1;
-  int prev_index;
 
   for (i=0;i<count;i++)
     {
-      int offset = rand() % (stop - start + 1);
+      offset = rand() % (stop - start + 1);
       prev_index = index;
       index = start + offset;
 
@@ -96,7 +105,6 @@ void do_random_test(fas_context_ref_type context, int start, int stop, int count
       if (video_error != FAS_SUCCESS)    fail("fail on test(seek)\n");
 
 
-      fas_raw_image_type test_frame;
       video_error = fas_get_frame(context, &test_frame);
       if (video_error != FAS_SUCCESS)    fail("fail on test(seek2)\n");
 
@@ -104,7 +112,7 @@ void do_random_test(fas_context_ref_type context, int start, int stop, int count
       
       if (!compare_frames(test_frame, ref_frames[offset]))
 	{	  
-	  char buffer[70];
+	  
 	  
 	  sprintf(buffer, "fail-%d-test.ppm", index);
 	  ppm_save(&test_frame, buffer);
@@ -128,6 +136,7 @@ int main (int argc, char **argv)
 {
   fas_error_type video_error;
   fas_context_ref_type context;
+  seek_table_type table;
   
   if (argc < 3) {
     fprintf (stderr, "usage: %s <video_file> <seek_table>\n", argv[0]);
@@ -136,7 +145,7 @@ int main (int argc, char **argv)
 
   fprintf(stderr, "%s : ", argv[1]);
 
-  seek_table_type table = read_table_file(argv[2]);
+  table = read_table_file(argv[2]);
   if (table.num_entries == 0)
     fail("bad table\n");
   

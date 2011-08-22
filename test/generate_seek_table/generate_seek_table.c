@@ -33,6 +33,8 @@ int main (int argc, char **argv)
 {
   //av_log_level = AV_LOG_QUIET;
 
+  seek_table_type table;
+
   if (argc < 2) {
     fprintf (stderr, "usage: %s <video_file>\n", argv[0]);
     return -1;
@@ -41,7 +43,6 @@ int main (int argc, char **argv)
   //we just need this to init avcodec....
   fas_initialize (FAS_FALSE, FAS_RGB24);
 
-  seek_table_type table;
   table = seek_init_table(16);
   generate_seek_table(argv[1], &table);
 

@@ -51,14 +51,14 @@ typedef enum
   seek_true  = 1
 } seek_boolean_type;
 
-typedef struct
+typedef struct seek_entry_struct
 {
   int     display_index;
   int64_t first_packet_dts;
   int64_t last_packet_dts;
 } seek_entry_type;
 
-typedef struct
+typedef struct seek_table_struct
 {
   seek_entry_type *array;
   seek_boolean_type completed;

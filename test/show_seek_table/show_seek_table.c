@@ -28,6 +28,7 @@ int main (int argc, char **argv)
   fas_error_type video_error;
   fas_context_ref_type context;
   fas_raw_image_type image_buffer;
+  seek_table_type table;
   
   if (argc < 2) {
     fprintf (stderr, "usage: %s <video_file>\n", argv[0]);
@@ -49,7 +50,6 @@ int main (int argc, char **argv)
     video_error = fas_step_forward (context);
   }
 
-  seek_table_type table;
   table = fas_get_seek_table(context);
 
   seek_show_raw_table(stdout, table);
