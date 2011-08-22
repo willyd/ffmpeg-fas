@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "ffmpeg_fas_private.h"
 /* If C++ then we need to __extern "C". Compiler defines __cplusplus */
 #ifdef __cplusplus
 #define __extern extern "C"
@@ -74,22 +75,22 @@ typedef struct seek_table_struct
  **********************************************************************/
 
 
-__extern seek_table_type seek_init_table    (int initial_size);
-__extern void            seek_release_table (seek_table_type *table);
+__extern fas_export seek_table_type seek_init_table    (int initial_size);
+__extern fas_export void            seek_release_table (seek_table_type *table);
 
-__extern seek_table_type seek_copy_table (seek_table_type source);
-__extern int             compare_seek_tables(seek_table_type t1, seek_table_type t2);
+__extern fas_export seek_table_type seek_copy_table (seek_table_type source);
+__extern fas_export int             compare_seek_tables(seek_table_type t1, seek_table_type t2);
 
-__extern seek_error_type seek_append_table_entry (seek_table_type *table, seek_entry_type entry);
+__extern fas_export seek_error_type seek_append_table_entry (seek_table_type *table, seek_entry_type entry);
 
-__extern seek_error_type seek_get_nearest_entry (seek_table_type *table, seek_entry_type *entry, int display_index, int offset);
+__extern fas_export seek_error_type seek_get_nearest_entry (seek_table_type *table, seek_entry_type *entry, int display_index, int offset);
 
-__extern seek_error_type seek_show_table (seek_table_type table);          /* human readable */
-__extern seek_error_type seek_show_raw_table (FILE *file, seek_table_type table);
+__extern fas_export seek_error_type seek_show_table (seek_table_type table);          /* human readable */
+__extern fas_export seek_error_type seek_show_raw_table (FILE *file, seek_table_type table);
 
-__extern seek_table_type read_table_file(char *name);                      /* read raw file */
+__extern fas_export seek_table_type read_table_file(char *name);                      /* read raw file */
 
-__extern seek_error_type generate_seek_table(const char * filename, seek_table_type * table);
+__extern fas_export seek_error_type generate_seek_table(const char * filename, seek_table_type * table);
 
 #endif
 

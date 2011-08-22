@@ -29,6 +29,7 @@
 #define __extern extern
 #endif
 
+#include "ffmpeg_fas_private.h"
 #include "seek_indices.h"
 
 
@@ -82,39 +83,39 @@ typedef enum
 } fas_boolean_type;
 
 
-__extern void             fas_initialize (fas_boolean_type logging, fas_color_space_type format);
-__extern void             fas_set_format (fas_color_space_type format);
+__extern fas_export void             fas_initialize (fas_boolean_type logging, fas_color_space_type format);
+__extern fas_export void             fas_set_format (fas_color_space_type format);
 
-__extern fas_error_type   fas_open_video  (fas_context_ref_type *context_ptr, char *file_path);
-__extern fas_error_type   fas_close_video (fas_context_ref_type context);
+__extern fas_export fas_error_type   fas_open_video  (fas_context_ref_type *context_ptr, char *file_path);
+__extern fas_export fas_error_type   fas_close_video (fas_context_ref_type context);
 
-__extern char*            fas_error_message (fas_error_type error);
+__extern fas_export char*            fas_error_message (fas_error_type error);
 
-__extern fas_boolean_type fas_frame_available (fas_context_ref_type context);
-__extern int              fas_get_frame_index (fas_context_ref_type context);
-__extern fas_error_type   fas_step_forward    (fas_context_ref_type context);
+__extern fas_export fas_boolean_type fas_frame_available (fas_context_ref_type context);
+__extern fas_export int              fas_get_frame_index (fas_context_ref_type context);
+__extern fas_export fas_error_type   fas_step_forward    (fas_context_ref_type context);
 
-__extern fas_error_type   fas_get_frame  (fas_context_ref_type context, fas_raw_image_type *image_ptr);
-__extern void             fas_free_frame (fas_raw_image_type image);
+__extern fas_export fas_error_type   fas_get_frame  (fas_context_ref_type context, fas_raw_image_type *image_ptr);
+__extern fas_export void             fas_free_frame (fas_raw_image_type image);
 
-__extern fas_error_type   fas_seek_to_nearest_key     (fas_context_ref_type context, int target_index);
-__extern fas_error_type   fas_seek_to_frame           (fas_context_ref_type context, int target_index);
+__extern fas_export fas_error_type   fas_seek_to_nearest_key     (fas_context_ref_type context, int target_index);
+__extern fas_export fas_error_type   fas_seek_to_frame           (fas_context_ref_type context, int target_index);
 
-__extern int              fas_get_frame_count         (fas_context_ref_type context);
-__extern int              fas_get_frame_count_fast    (fas_context_ref_type context);
+__extern fas_export int              fas_get_frame_count         (fas_context_ref_type context);
+__extern fas_export int              fas_get_frame_count_fast    (fas_context_ref_type context);
 
-__extern fas_error_type   fas_put_seek_table  (fas_context_ref_type context, seek_table_type table);
-__extern seek_table_type  fas_get_seek_table  (fas_context_ref_type context);
+__extern fas_export fas_error_type   fas_put_seek_table  (fas_context_ref_type context, seek_table_type table);
+__extern fas_export seek_table_type  fas_get_seek_table  (fas_context_ref_type context);
 
 /* will extract raw 420p if the video is in that format -- needs to be alloced ahead of time*/
-__extern fas_error_type  fas_fill_420p_ptrs (fas_context_ref_type context, unsigned char *y, unsigned char *u, unsigned char *v);
+__extern fas_export fas_error_type  fas_fill_420p_ptrs (fas_context_ref_type context, unsigned char *y, unsigned char *u, unsigned char *v);
 
 /* will extract gray8 data from movie (will convert to ensure you get it) -- need to be alloc'ed ahead of time*/
-__extern fas_error_type  fas_fill_gray8_ptr(fas_context_ref_type context, unsigned char *y);
+__extern fas_export fas_error_type  fas_fill_gray8_ptr(fas_context_ref_type context, unsigned char *y);
 
-__extern int  fas_get_current_width(fas_context_ref_type context);
-__extern int  fas_get_current_height(fas_context_ref_type context);
+__extern fas_export int  fas_get_current_width(fas_context_ref_type context);
+__extern fas_export int  fas_get_current_height(fas_context_ref_type context);
 
-__extern unsigned long long fas_get_frame_duration(fas_context_ref_type context);
+__extern fas_export unsigned long long fas_get_frame_duration(fas_context_ref_type context);
 
 #endif 

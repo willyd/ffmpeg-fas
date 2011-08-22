@@ -10,6 +10,7 @@ seek_indices.c )
 
 set(FFMPEG_FAS_HEADERS
 ffmpeg_fas.h
+ffmpeg_fas_private.h
 private_errors.h
 seek_indices.h )
 
@@ -18,6 +19,8 @@ include_directories(${FFMPEG_INCLUDE_DIRS} ${MSINTTYPES_INCLUDE_DIR})
 else(MSVC)
 include_directories(${FFMPEG_INCLUDE_DIRS})
 endif(MSVC)
+
+add_definitions(-Dfas_compile_lib)
 
 add_library(ffmpeg_fas SHARED ${FFMPEG_FAS_SOURCES} ${FFMPEG_FAS_HEADERS})
 
