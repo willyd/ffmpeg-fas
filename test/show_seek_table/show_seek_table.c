@@ -1,12 +1,12 @@
 /*****************************************************************************
  * Copyright 2008. Pittsburgh Pattern Recognition, Inc.
- * 
- * This file is part of the Frame Accurate Seeking extension library to 
+ *
+ * This file is part of the Frame Accurate Seeking extension library to
  * ffmpeg (ffmpeg-fas).
- * 
- * ffmpeg-fas is free software; you can redistribute it and/or modify it 
- * under the terms of the GNU Lesser General Public License as published by 
- * the Free Software Foundation; either version 3 of the License, or (at your 
+ *
+ * ffmpeg-fas is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at your
  * option) any later version.
  *
  * The ffmpeg-fas library is distributed in the hope that it will be useful, but
@@ -29,14 +29,14 @@ int main (int argc, char **argv)
   fas_context_ref_type context;
   fas_raw_image_type image_buffer;
   seek_table_type table;
-  
+
   if (argc < 2) {
     fprintf (stderr, "usage: %s <video_file>\n", argv[0]);
     return -1;
   }
 
   fas_initialize (FAS_FALSE, FAS_RGB24);
-  
+
   video_error = fas_open_video (&context, argv[1]);
   if (video_error != FAS_SUCCESS)
     return -1;
@@ -53,6 +53,6 @@ int main (int argc, char **argv)
   table = fas_get_seek_table(context);
 
   seek_show_raw_table(stdout, table);
-  
+
   return 1;
 }

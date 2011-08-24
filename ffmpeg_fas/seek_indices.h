@@ -90,7 +90,6 @@ __extern fas_export seek_error_type seek_show_raw_table (FILE *file, seek_table_
 
 __extern fas_export seek_table_type read_table_file(char *name);                      /* read raw file */
 
-__extern fas_export seek_error_type generate_seek_table(const char * filename, seek_table_type * table);
 
 #endif
 
