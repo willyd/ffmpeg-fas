@@ -4,12 +4,14 @@ http://cmake.org
 ================
 1. DEPENDENCIES:
 ffmpeg - ffmpeg.org
-Most Linux boxes should have this.  To build, you'll need the ffmpeg "dev" package (or whatever your distro calls the headers)
-installed as well.
+Most Linux setups should have ffmpeg installed.  To build this library, 
+you'll need the ffmpeg "dev" (or header) package installed as well.
+In Ubuntu, this is split into libavdevice-dev, libavutil-dev,
+libavcodec-dev, libavformat-dev and libswscale-dev.
+Other distros may use names such as "ffmpeg-dev" or "libav-dev".
 
-On Windows, you'll need the Dev builds at http://ffmpeg.zeranoe.com/builds/ .
-
-
+On Windows, you'll need the FFMPEG Dev builds at 
+http://ffmpeg.zeranoe.com/builds/ .
 
 ======================
 2. BUILDING FFMPEG-FAS:
@@ -28,7 +30,8 @@ Note: You'll need to set the variable FFMPEG_ROOT to point to
 the folder with FFMPEG installed.
 
 
-To generate MSVC project files, you can use cmake-gui and select your version of MSVC, or use cmake .. -G <generator>.
+To generate MSVC project files, you can use cmake-gui and select your version 
+of MSVC, or use cmake .. -G <generator>.
 Use cmake --help to determine the correct generator.
 
 Install routines are not yet implemented.
