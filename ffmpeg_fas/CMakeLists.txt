@@ -10,6 +10,7 @@ seek_indices.c )
 
 set(FFMPEG_FAS_HEADERS
 ffmpeg_fas.h
+ffmpeg_fas_compat.h
 ffmpeg_fas_private.h
 private_errors.h
 seek_indices.h )

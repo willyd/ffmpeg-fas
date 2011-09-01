@@ -41,6 +41,7 @@ extern "C"
 
 #include "seek_indices.h"
 #include "private_errors.h"
+#include "ffmpeg_fas_compat.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -518,7 +519,7 @@ fas_error_type fas_get_frame(fas_context_ref_type context, fas_raw_image_type *i
 
   fas_error = private_convert_to_rgb(context);
 
-  
+
   for (j=0;j<context->codec_context->height; j++)
     {
       from = context->rgb_frame_buffer->data[0] + j*context->rgb_frame_buffer->linesize[0];
@@ -757,7 +758,7 @@ int fas_get_frame_count (fas_context_ref_type context)
   int current_frame;
   int fast;
   fas_error_type fas_error;
-  
+
   fast = fas_get_frame_count_fast(context);
   if (fast >= 0)
     return fast;

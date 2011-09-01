@@ -1,6 +1,8 @@
 #ifndef FFMPEG_FAS_PRIVATE_H
 #define FFMPEG_FAS_PRIVATE_H
 
+
+
 #ifdef _MSC_VER
 #define fas_export_decl __declspec(dllexport)
 #define fas_import_decl __declspec(dllimport)
