@@ -229,7 +229,7 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, const char *fi
   if (SHOW_WARNING_MESSAGES)
     av_dump_format(fas_context->format_context, 0, file_path, 0);
 
-  for (stream_idx = 0; stream_idx < fas_context->format_context->nb_streams; stream_idx++)
+for (stream_idx = 0; stream_idx < fas_context->format_context->nb_streams; stream_idx++)
   {
     if (fas_context->format_context->streams[stream_idx]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
     {
@@ -945,4 +945,11 @@ fas_error_type  fas_fill_420p_ptrs (fas_context_ref_type context, unsigned char 
     }
 
   return FAS_SUCCESS;
+}
+
+void fas_get_fps(fas_context_ref_type context, int* num, int* den)
+{
+    AVRational fps = av_stream_get_r_frame_rate(context->format_context->streams[context->stream_idx]);
+    *num = fps.num;
+    *den = fps.den;
 }

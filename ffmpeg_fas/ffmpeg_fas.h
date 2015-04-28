@@ -84,6 +84,8 @@ typedef enum
   FAS_TRUE  = 1
 } fas_boolean_type;
 
+//typedef struct AVFormatContext AVFormatContext;
+//typedef struct AVCodecContext AVCodecContext;
 
 __extern fas_export void             fas_initialize (fas_boolean_type logging, fas_color_space_type format);
 __extern fas_export void             fas_set_format (fas_color_space_type format);
@@ -119,5 +121,7 @@ __extern fas_export int  fas_get_current_width(fas_context_ref_type context);
 __extern fas_export int  fas_get_current_height(fas_context_ref_type context);
 
 __extern fas_export unsigned long long fas_get_frame_duration(fas_context_ref_type context);
+
+__extern fas_export void fas_get_fps(fas_context_ref_type context, int* num, int* den);
 
 #endif

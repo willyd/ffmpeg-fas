@@ -1,5 +1,6 @@
-#include "videoreader.h"
+#include <opencv2/highgui/highgui_c.h>
 #include "ffmpeg_fas.h"
+#include "videoreader.h"
 
 struct FasInitializer
 {
@@ -51,8 +52,8 @@ bool VideoReader::isOpened() const
 bool VideoReader::seek(int frameIndex)
 {
     if (m_ctx) {
-        int currentFrameIndex = fas_get_frame_index(m_ctx);
-        if (currentFrameIndex != frameIndex) {
+        int currFrameIndex = currentFrameIndex();
+        if (currFrameIndex != frameIndex) {
             fas_error_type err = fas_seek_to_frame(m_ctx, frameIndex);
             if (err != FAS_SUCCESS) {
                 return false;
@@ -66,6 +67,33 @@ bool VideoReader::seek(int frameIndex)
 
 bool VideoReader::read(cv::Mat& image)
 {
+    return grab() && retrieve(image);
+}
+
+bool VideoReader::read(cv::Mat& image, int frameIndex)
+{
+    return seek(frameIndex) && retrieve(image);
+}
+
+int VideoReader::frameCount() const
+{
+    if (isOpened()) {
+        return fas_get_frame_count(m_ctx);
+    }
+    return 0;
+}
+
+bool VideoReader::grab()
+{
+    if (m_ctx) {
+        fas_error_type err = fas_step_forward(m_ctx);
+        return err == FAS_SUCCESS;
+    }
+    return false;
+}
+
+bool VideoReader::retrieve(cv::Mat& image)
+{
     fas_raw_image_type fas_image;
     fas_error_type err = fas_get_frame(m_ctx, &fas_image);
     if (err != FAS_SUCCESS) {
@@ -75,16 +103,39 @@ bool VideoReader::read(cv::Mat& image)
     return true;
 }
 
-bool VideoReader::read(cv::Mat& image, int frameIndex)
+int VideoReader::currentFrameIndex() const
 {
-    return seek(frameIndex) && read(image);
+    if (m_ctx){
+        return fas_get_frame_index(m_ctx);
+    }
+    return -1;
 }
 
-int VideoReader::frameCount() const
+double VideoReader::get(int propId)
 {
-    if (isOpened()) {
-        return fas_get_frame_count(m_ctx);
+    if (m_ctx) {
+        switch (propId)
+        {
+        case CV_CAP_PROP_POS_FRAMES:
+            return (double)currentFrameIndex();
+        case CV_CAP_PROP_FRAME_COUNT:
+            return (double)frameCount();
+        case CV_CAP_PROP_FPS:
+            return fps();
+        default:
+            return 0.0;
+        }
     }
-    return 0;
+    return 0.0;
+}
+
+double VideoReader::fps() const
+{
+    if (m_ctx) {
+        int num, den;
+        fas_get_fps(m_ctx, &num, &den);
+        return double(num) / den;
+    }
+    return 0.0;
 }
 
