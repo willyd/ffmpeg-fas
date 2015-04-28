@@ -213,13 +213,14 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
   fas_context->first_dts              = AV_NOPTS_VALUE;
   fas_context->seek_table = seek_init_table(-1); /* default starting size */
 
-  if (av_open_input_file(&(fas_context->format_context), file_path, NULL, 0, NULL ) != 0)
+  //if (av_open_input_file(&(fas_context->format_context), file_path, NULL, 0, NULL ) != 0)
+  if (avformat_open_input(&(fas_context->format_context), file_path, NULL, NULL) != 0)
   {
     fas_close_video(fas_context);
     return private_show_error("failure to open file", FAS_UNSUPPORTED_FORMAT);
   }
 
-  if (av_find_stream_info (fas_context->format_context) < 0)
+  if (avformat_find_stream_info (fas_context->format_context, NULL) < 0)
   {
     fas_close_video(fas_context);
     return private_show_error("could not extract stream information", FAS_UNSUPPORTED_FORMAT);
@@ -253,7 +254,7 @@ fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_pat
     return private_show_error("failed to find correct video codec", FAS_UNSUPPORTED_CODEC);
   }
 
-  if (avcodec_open(fas_context->codec_context, codec) < 0)
+  if (avcodec_open2(fas_context->codec_context, codec, NULL) < 0)
   {
     fas_context->codec_context = 0;
     fas_close_video(fas_context);
@@ -317,7 +318,7 @@ fas_error_type fas_close_video (fas_context_ref_type context)
       avcodec_close(context->codec_context);
 
   if (context->format_context)
-    av_close_input_file (context->format_context);
+    avformat_close_input(&context->format_context);
 
   if (context->rgb_frame_buffer)
     av_free (context->rgb_frame_buffer);
@@ -841,8 +842,9 @@ fas_error_type private_convert_to_rgb (fas_context_ref_type ctx)
   if (ctx->rgb_already_converted)
     return FAS_SUCCESS;
 
-  if(sws_scale(img_convert_ctx, ctx->frame_buffer->data, ctx->frame_buffer->linesize,
-               0, h, ctx->rgb_frame_buffer->data, ctx->rgb_frame_buffer->linesize))
+  int out_slice_h = sws_scale(img_convert_ctx, ctx->frame_buffer->data, ctx->frame_buffer->linesize,
+      0, h, ctx->rgb_frame_buffer->data, ctx->rgb_frame_buffer->linesize);
+  if(out_slice_h < 0)
      private_show_error("error converting to rgb", FAS_DECODING_ERROR);
 
   ctx->rgb_already_converted = FAS_TRUE;
