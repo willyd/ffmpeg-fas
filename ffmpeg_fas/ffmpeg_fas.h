@@ -88,7 +88,7 @@ typedef enum
 __extern fas_export void             fas_initialize (fas_boolean_type logging, fas_color_space_type format);
 __extern fas_export void             fas_set_format (fas_color_space_type format);
 
-__extern fas_export fas_error_type   fas_open_video  (fas_context_ref_type *context_ptr, char *file_path);
+__extern fas_export fas_error_type   fas_open_video  (fas_context_ref_type *context_ptr, const char *file_path);
 __extern fas_export fas_error_type   fas_close_video (fas_context_ref_type context);
 
 __extern fas_export char*            fas_error_message (fas_error_type error);

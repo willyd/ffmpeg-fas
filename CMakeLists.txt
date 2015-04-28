@@ -23,3 +23,5 @@ add_subdirectory(ffmpeg_fas)
 if(${FFMPEG_FAS_BUILD_TESTS})
 	add_subdirectory(test)
 endif(${FFMPEG_FAS_BUILD_TESTS})
+
+add_subdirectory(sample)

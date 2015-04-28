@@ -186,7 +186,7 @@ void fas_initialize (fas_boolean_type logging, fas_color_space_type format)
 }
 
 /* fas_open_video */
-fas_error_type fas_open_video (fas_context_ref_type *context_ptr, char *file_path)
+fas_error_type fas_open_video (fas_context_ref_type *context_ptr, const char *file_path)
 {
   int stream_idx;
   int numBytes;
