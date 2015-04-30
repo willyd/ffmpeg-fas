@@ -100,6 +100,7 @@ bool VideoReader::retrieve(cv::Mat& image)
         return false;
     }
     image = cv::Mat(fas_image.height, fas_image.width, CV_8UC3, fas_image.data, fas_image.bytes_per_line).clone();
+    fas_free_frame(fas_image);
     return true;
 }
 

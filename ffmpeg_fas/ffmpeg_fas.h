@@ -59,6 +59,16 @@ typedef struct
 } fas_raw_image_type;
 
 
+// struct fas_raw_image_type
+// {
+  // unsigned char *data;
+  // int width;
+  // int height;
+  // int bytes_per_line;
+  // fas_color_space_type color_space;
+// } ;
+
+
 /**********************************************************************
  * Video IO Types
  **********************************************************************/
@@ -99,6 +109,8 @@ __extern fas_export fas_boolean_type fas_frame_available (fas_context_ref_type c
 __extern fas_export int              fas_get_frame_index (fas_context_ref_type context);
 __extern fas_export fas_error_type   fas_step_forward    (fas_context_ref_type context);
 
+// __extern fas_export fas_error_type   fas_get_frame  (fas_context_ref_type context, struct fas_raw_image_type *image_ptr);
+// __extern fas_export void             fas_free_frame (struct fas_raw_image_type image);
 __extern fas_export fas_error_type   fas_get_frame  (fas_context_ref_type context, fas_raw_image_type *image_ptr);
 __extern fas_export void             fas_free_frame (fas_raw_image_type image);
 

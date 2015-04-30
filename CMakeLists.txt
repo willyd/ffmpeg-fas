@@ -25,3 +25,4 @@ if(${FFMPEG_FAS_BUILD_TESTS})
 endif(${FFMPEG_FAS_BUILD_TESTS})
 
 add_subdirectory(sample)
+add_subdirectory(python)

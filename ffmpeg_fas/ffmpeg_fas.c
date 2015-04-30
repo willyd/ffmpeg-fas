@@ -450,6 +450,7 @@ int fas_get_frame_index (fas_context_ref_type context)
 /* fas_get_frame */
 
 fas_error_type fas_get_frame(fas_context_ref_type context, fas_raw_image_type *image_ptr)
+// fas_error_type fas_get_frame(fas_context_ref_type context, struct fas_raw_image_type *image_ptr)
 {
   int buffer_size;
   fas_error_type fas_error;
@@ -466,6 +467,7 @@ fas_error_type fas_get_frame(fas_context_ref_type context, fas_raw_image_type *i
   if (!fas_frame_available(context))
     return private_show_error("no frame available for extraction", FAS_NO_MORE_FRAMES);
 
+  // memset (image_ptr, 0, sizeof (struct fas_raw_image_type));
   memset (image_ptr, 0, sizeof (fas_raw_image_type));
 
   switch (fmt)
@@ -538,6 +540,7 @@ fas_error_type fas_get_frame(fas_context_ref_type context, fas_raw_image_type *i
 /* fas_free_frame */
 
 void fas_free_frame (fas_raw_image_type image)
+// void fas_free_frame (struct fas_raw_image_type image)
 {
   if (NULL == image.data)
     return;
@@ -831,6 +834,7 @@ fas_error_type private_convert_to_rgb (fas_context_ref_type ctx)
   static struct SwsContext *img_convert_ctx;
   int w = ctx->codec_context->width;
   int h = ctx->codec_context->height;
+  int out_slice_h;
 
   img_convert_ctx = sws_getContext(w, h, ctx->codec_context->pix_fmt,
                                    w, h, fmt, SWS_BICUBIC,
@@ -842,8 +846,7 @@ fas_error_type private_convert_to_rgb (fas_context_ref_type ctx)
   if (ctx->rgb_already_converted)
     return FAS_SUCCESS;
 
-  int out_slice_h = sws_scale(img_convert_ctx, ctx->frame_buffer->data, ctx->frame_buffer->linesize,
-      0, h, ctx->rgb_frame_buffer->data, ctx->rgb_frame_buffer->linesize);
+  out_slice_h = sws_scale(img_convert_ctx, ctx->frame_buffer->data, ctx->frame_buffer->linesize, 0, h, ctx->rgb_frame_buffer->data, ctx->rgb_frame_buffer->linesize);
   if(out_slice_h < 0)
      private_show_error("error converting to rgb", FAS_DECODING_ERROR);
 
