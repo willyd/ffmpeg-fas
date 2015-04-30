@@ -35,3 +35,7 @@ of MSVC, or use cmake .. -G <generator>.
 Use cmake --help to determine the correct generator.
 
 Install routines are not yet implemented.
+
+# A sample video reader class that mimics OpenCV VideoCapture was added in sample
+# Also python bindings that makes it easy to read any video was added too.
+# Only tested on Windows
