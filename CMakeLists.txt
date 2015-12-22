@@ -4,7 +4,7 @@ set (FFMPEG_FAS_BUILD_TESTS 1 CACHE BOOL "Set ON to build tests")
 
 project(FFMPEG_FAS)
 
-set(CMAKE_MODULE_PATH "${FFMPEG_FAS_SOURCE_DIR}/CMake")
+list(APPEND CMAKE_MODULE_PATH "${FFMPEG_FAS_SOURCE_DIR}/CMake")
 set(FFMPEG_FAS_INCLUDE_DIR "${FFMPEG_FAS_SOURCE_DIR}/ffmpeg_fas")
 
 #default locations

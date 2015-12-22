@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
 
-include(FindFFMPEG)
-
-
 set(FFMPEG_FAS_SOURCES
 ffmpeg_fas.c
 seek_indices.c )
